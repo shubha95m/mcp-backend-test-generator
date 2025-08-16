@@ -8,7 +8,7 @@ Generate RestAssured API tests (Java) from curl commands.
 Navigate to the project root and build the executable JAR:
 
 ```bash
-cd /Users/akshitagandotra/mcp-backend-test-generator
+cd mcp-backend-test-generator
 mvn clean install
 ```
 
