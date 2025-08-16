@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mcp.backend.util.FileUtils;
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -86,6 +88,20 @@ public class DtoGenerator {
 
         sb.append("}\n");
         return sb.toString();
+    }
+
+    public static void generateRequestAndResponseDtos(String requestClassName, String responseClassName, String requestJson, String responseJson, String packageName) {
+        try {
+            // Generate Request DTO
+            String requestDto = generateDto(requestClassName, requestJson, packageName);
+            FileUtils.writeFile(packageName.replace('.', '/'), requestClassName + ".java", requestDto);
+
+            // Generate Response DTO
+            String responseDto = generateDto(responseClassName, responseJson, packageName);
+            FileUtils.writeFile(packageName.replace('.', '/'), responseClassName + ".java", responseDto);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to generate DTOs: " + e.getMessage(), e);
+        }
     }
 
     private static String getJavaType(JsonNode node) {

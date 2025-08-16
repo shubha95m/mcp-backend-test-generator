@@ -10,12 +10,10 @@ import java.util.regex.Pattern;
 
 public class CurlParser {
 
-    private static final Pattern URL_PATTERN = Pattern.compile("(https?://\\S+)");
+    private static final Pattern URL_PATTERN = Pattern.compile("(https?://[^'\"\\s]+)");
     private static final Pattern METHOD_PATTERN = Pattern.compile("-X\\s+(\\S+)");
-    private static final Pattern HEADER_PATTERN = Pattern.compile("-H\\s+\"([^\"]+)\"");
-    private static final Pattern DATA_PATTERN = Pattern.compile("-d\\s+\"([^\"]*)\"");
-    // Pattern to capture single-quoted data, common in Linux/macOS terminals
-    private static final Pattern DATA_SINGLE_QUOTE_PATTERN = Pattern.compile("-d\\s+'([^']*)'");
+    private static final Pattern HEADER_PATTERN = Pattern.compile("-H\\s+'([^']+)'");
+    private static final Pattern DATA_PATTERN = Pattern.compile("--data\\s+'(\\{[^}]+\\})'");
 
     public static ApiRequest parse(String curlCommand, String responseBody) {
         System.out.println("DEBUG: Parsing curl command: " + curlCommand);
@@ -53,17 +51,20 @@ public class CurlParser {
         return new ApiRequest(url, method, headers, requestBody, responseBody, testName);
     }
 
-    private static String extract(String command, Pattern pattern) {
-        Matcher matcher = pattern.matcher(command);
+    private static String extractData(String command) {
+        Matcher matcher = DATA_PATTERN.matcher(command);
         if (matcher.find()) {
-            return matcher.group(1);
+            String data = matcher.group(1);
+            // Clean up any escaped quotes
+            return data.replace("\\'", "'").replace("\\\"", "\"");
         }
         return null;
     }
 
     private static Map<String, String> extractHeaders(String command) {
         Map<String, String> headers = new HashMap<>();
-        Matcher matcher = HEADER_PATTERN.matcher(command);
+        Pattern headerPattern = Pattern.compile("-H\\s+['\"]([^'\"]+)['\"]");
+        Matcher matcher = headerPattern.matcher(command);
         while (matcher.find()) {
             String header = matcher.group(1);
             String[] parts = header.split(":\\s*", 2);
@@ -74,12 +75,12 @@ public class CurlParser {
         return headers;
     }
 
-    private static String extractData(String command) {
-        String data = extract(command, DATA_PATTERN);
-        if (data == null) {
-            data = extract(command, DATA_SINGLE_QUOTE_PATTERN);
+    private static String extract(String command, Pattern pattern) {
+        Matcher matcher = pattern.matcher(command);
+        if (matcher.find()) {
+            return matcher.group(1);
         }
-        return data;
+        return null;
     }
 
     private static String generateTestName(String url, String method) {

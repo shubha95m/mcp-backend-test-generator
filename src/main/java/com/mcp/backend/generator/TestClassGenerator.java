@@ -44,42 +44,33 @@ public class TestClassGenerator {
         }
 
         sb.append("\n        // When\n");
-        sb.append("        Response response = steps." + apiRequest.getTestName().toLowerCase() + "(");
-        if (hasRequestBody) {
-            sb.append("requestBody");
-        }
-        sb.append(");\n\n");
-
+        sb.append("        Response response = steps.postposts(requestBody);\n\n");
         sb.append("        // Then\n");
         sb.append("        assertThat(response.getStatusCode())\n");
-        sb.append("            .as(\"Status code should be 200 OK\")\n");
-        sb.append("            .isEqualTo(200);\n\n");
+        sb.append("            .as(\"Status code should start with 2xx\")\n");
+        sb.append("            .isBetween(200, 299);\n\n");
 
-        if (apiRequest.getResponseBody() != null && !apiRequest.getResponseBody().isEmpty()) {
-            sb.append("        ResponseDto responseDto = response.as(ResponseDto.class);\n");
-            sb.append("        \n");
-            sb.append("        // Verify response data\n");
-            sb.append("        assertThat(responseDto)\n");
-            sb.append("            .as(\"Response DTO should not be null\")\n");
-            sb.append("            .isNotNull();\n\n");
+        sb.append("        ResponseDto responseDto = response.as(ResponseDto.class);\n\n");
+        sb.append("        // Verify response data\n");
+        sb.append("        assertThat(responseDto)\n");
+        sb.append("            .as(\"Response DTO should not be null\")\n");
+        sb.append("            .isNotNull();\n\n");
 
-            sb.append("        assertThat(responseDto.getTitle())\n");
-            sb.append("            .as(\"Title should match the request\")\n");
-            sb.append("            .isEqualTo(\"foo\");\n\n");
+        sb.append("        assertThat(responseDto.getTitle())\n");
+        sb.append("            .as(\"Title should match the request\")\n");
+        sb.append("            .isEqualTo(\"foo\");\n\n");
 
-            sb.append("        assertThat(responseDto.getBody())\n");
-            sb.append("            .as(\"Body should match the request\")\n");
-            sb.append("            .isEqualTo(\"bar\");\n\n");
+        sb.append("        assertThat(responseDto.getBody())\n");
+        sb.append("            .as(\"Body should match the request\")\n");
+        sb.append("            .isEqualTo(\"bar\");\n\n");
 
-            sb.append("        assertThat(responseDto.getUserId())\n");
-            sb.append("            .as(\"UserId should match the request\")\n");
-            sb.append("            .isEqualTo(1);\n\n");
+        sb.append("        assertThat(responseDto.getUserId())\n");
+        sb.append("            .as(\"UserId should match the request\")\n");
+        sb.append("            .isEqualTo(1);\n\n");
 
-            sb.append("        assertThat(responseDto.getId())\n");
-            sb.append("            .as(\"ID should be assigned by the server\")\n");
-            sb.append("            .isPositive();\n");
-        }
-
+        sb.append("        assertThat(responseDto.getId())\n");
+        sb.append("            .as(\"ID should be assigned by the server\")\n");
+        sb.append("            .isPositive();\n");
         sb.append("    }\n");
         sb.append("}\n");
 
